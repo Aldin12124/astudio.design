@@ -2014,7 +2014,10 @@ html[data-theme="light"] .loader-grid{opacity:.26}
   .gradient-text{animation:none!important;background-size:auto}
   .project-visual::after{display:none}
   .faq-item>p{animation:none}
-}</style>
+}.form-honeypot{position:absolute!important;left:-10000px!important;top:auto!important;width:1px!important;height:1px!important;overflow:hidden!important}
+.form-submit:disabled{opacity:.65;cursor:wait}
+.form-status-error{color:#f0a0a0!important}
+html[data-theme="light"] .form-status-error{color:#a83636!important}</style>
 
 </head>
 <body>
@@ -2138,13 +2141,13 @@ html[data-theme="light"] .loader-grid{opacity:.26}
     </section>
     <section class="section-pad contact-section" id="contact">
       <div class="shell contact-layout"><div class="contact-intro reveal"><p class="eyebrow"><span class="eyebrow-line"></span> Your next chapter</p><h2>Have a project<br>in mind<span class="accent-dot">?</span></h2><p>Let's create something exceptional together. Tell us about your business and what you have in mind.</p><div class="contact-details"><div><span class="detail-label">EMAIL</span><a href="mailto:astudio.design@proton.me">astudio.design@proton.me</a></div><div><span class="detail-label">PHONE</span><a href="tel:+38348288492">+383 48 288 492</a></div><div><span class="detail-label">INSTAGRAM</span><a href="https://www.instagram.com/astudio.web/" target="_blank" rel="noopener noreferrer">@astudio.web ↗</a></div><div><span class="detail-label">LOCATION</span><span>Prizren, Kosovo</span></div></div></div>
-        <form class="contact-form reveal" id="inquiry-form">
-          <div class="form-top"><span>PROJECT INQUIRY</span><span>01 — LET'S TALK</span></div>
+        <form class="contact-form reveal" id="inquiry-form" method="POST" action="/api/contact">
+          <div class="form-top"><span>PROJECT INQUIRY</span><span>01 — LET'S TALK</span></div><div class="form-honeypot" aria-hidden="true"><input type="text" name="company_website" tabindex="-1" autocomplete="off"></div>
           <div class="form-row"><label>Full name <span>*</span><input name="name" autocomplete="name" required placeholder="Your name"></label><label>Email address <span>*</span><input type="email" name="email" autocomplete="email" required placeholder="you@company.com"></label></div>
           <div class="form-row"><label>Business name <span class="optional">OPTIONAL</span><input name="business" autocomplete="organization" placeholder="Your business"></label><label>Website type <span>*</span><select name="type" required><option value="" disabled selected>Select a service</option><option>Business website</option><option>E-commerce website</option><option>Restaurant website</option><option>Portfolio website</option><option>Landing page</option><option>Website redesign</option><option>Not sure yet</option></select></label></div>
           <label>Tell us about your project <span>*</span><textarea name="description" required rows="4" placeholder="What are you working on? What would a great result look like?"></textarea></label>
           <label>Estimated budget <span class="optional">OPTIONAL</span><input name="budget" inputmode="text" placeholder="Add an approximate range, if known"></label>
-          <button class="button button-light form-submit" type="submit">Send project inquiry <span>↗</span></button><p class="form-status" id="form-status" aria-live="polite">This form is ready to connect to your inquiry backend. No message is sent from this demo.</p>
+          <button class="button button-light form-submit" type="submit">Send project inquiry <span>↗</span></button><p class="form-status" id="form-status" aria-live="polite"></p>
         </form>
       </div>
     </section>
@@ -2394,13 +2397,40 @@ html[data-theme="light"] .loader-grid{opacity:.26}
     });
   });
 
-  document.querySelector('#inquiry-form').addEventListener('submit', event => {
+  const inquiryForm = document.querySelector('#inquiry-form');
+  inquiryForm.addEventListener('submit', async event => {
     event.preventDefault();
     const status = document.querySelector('#form-status');
-    status.textContent = document.documentElement.lang === 'sq'
-      ? 'Kërkesa juaj është plotësuar dhe gati për lidhje me sistemin. Ky version nuk dërgon mesazhe.'
-      : 'Your inquiry is complete and ready for a backend connection. No message was sent from this demo.';
-    status.classList.add('form-status-success');
+    const submitButton = inquiryForm.querySelector('[type="submit"]');
+    const isAlbanian = document.documentElement.lang === 'sq';
+    status.classList.remove('form-status-success', 'form-status-error');
+    status.textContent = isAlbanian ? 'Duke dërguar kërkesën…' : 'Sending your inquiry…';
+    submitButton.disabled = true;
+    submitButton.setAttribute('aria-busy', 'true');
+
+    try {
+      const formData = Object.fromEntries(new FormData(inquiryForm).entries());
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || 'send_failed');
+      status.textContent = document.documentElement.lang === 'sq'
+        ? 'Faleminderit — kërkesa u dërgua. Do t’ju kontaktojmë së shpejti.'
+        : 'Thanks — your inquiry was sent. We’ll be in touch soon.';
+      status.classList.add('form-status-success');
+      inquiryForm.reset();
+    } catch (_) {
+      status.textContent = document.documentElement.lang === 'sq'
+        ? 'Kërkesa nuk u dërgua. Provoni përsëri ose na shkruani në WhatsApp.'
+        : 'We couldn’t send your inquiry. Please try again or message us on WhatsApp.';
+      status.classList.add('form-status-error');
+    } finally {
+      submitButton.disabled = false;
+      submitButton.removeAttribute('aria-busy');
+    }
   });
 
   if (motionAllowed && matchMedia('(hover: hover)').matches) {
