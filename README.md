@@ -1,12 +1,5 @@
 # A STUDIO
 
-Single-file website deployed on Vercel. The contact form submits to `api/contact.js` and sends inquiries through Resend.
+Single-file website deployed on Vercel. The contact form submits directly to Web3Forms using the public form access key embedded in `index.html`.
 
-## Vercel environment variables
-
-Set these in **Project Settings → Environment Variables**, then redeploy:
-
-- `RESEND_API_KEY`: a Resend API key with sending permission.
-- `RESEND_FROM_EMAIL`: a sender on a domain verified in Resend, formatted like `A STUDIO <hello@your-verified-domain.com>`.
-
-Form notifications are sent to `astudio.design@proton.me`. The Resend API key stays on the server and is never included in the website HTML. For production delivery, verify a domain you control in Resend and use an address on that domain as the sender.
+The recipient email and access key are managed in Web3Forms. No custom domain or Vercel environment variables are required. The Web3Forms free plan currently allows 250 submissions per month; some free hosting subdomains may need approval by Web3Forms before submissions are accepted.

@@ -2141,8 +2141,12 @@ html[data-theme="light"] .form-status-error{color:#a83636!important}</style>
     </section>
     <section class="section-pad contact-section" id="contact">
       <div class="shell contact-layout"><div class="contact-intro reveal"><p class="eyebrow"><span class="eyebrow-line"></span> Your next chapter</p><h2>Have a project<br>in mind<span class="accent-dot">?</span></h2><p>Let's create something exceptional together. Tell us about your business and what you have in mind.</p><div class="contact-details"><div><span class="detail-label">EMAIL</span><a href="mailto:astudio.design@proton.me">astudio.design@proton.me</a></div><div><span class="detail-label">PHONE</span><a href="tel:+38348288492">+383 48 288 492</a></div><div><span class="detail-label">INSTAGRAM</span><a href="https://www.instagram.com/astudio.web/" target="_blank" rel="noopener noreferrer">@astudio.web ↗</a></div><div><span class="detail-label">LOCATION</span><span>Prizren, Kosovo</span></div></div></div>
-        <form class="contact-form reveal" id="inquiry-form" method="POST" action="/api/contact">
-          <div class="form-top"><span>PROJECT INQUIRY</span><span>01 — LET'S TALK</span></div><div class="form-honeypot" aria-hidden="true"><input type="text" name="company_website" tabindex="-1" autocomplete="off"></div>
+        <form class="contact-form reveal" id="inquiry-form" method="POST" action="https://api.web3forms.com/submit">
+          <input type="hidden" name="access_key" value="48ba776b-9bef-459d-8449-388b7ac04d43">
+          <input type="hidden" name="subject" value="New A STUDIO project inquiry">
+          <input type="hidden" name="from_name" value="A STUDIO website">
+          <input type="checkbox" name="botcheck" tabindex="-1" autocomplete="off" style="display:none">
+          <div class="form-top"><span>PROJECT INQUIRY</span><span>01 — LET'S TALK</span></div>
           <div class="form-row"><label>Full name <span>*</span><input name="name" autocomplete="name" required placeholder="Your name"></label><label>Email address <span>*</span><input type="email" name="email" autocomplete="email" required placeholder="you@company.com"></label></div>
           <div class="form-row"><label>Business name <span class="optional">OPTIONAL</span><input name="business" autocomplete="organization" placeholder="Your business"></label><label>Website type <span>*</span><select name="type" required><option value="" disabled selected>Select a service</option><option>Business website</option><option>E-commerce website</option><option>Restaurant website</option><option>Portfolio website</option><option>Landing page</option><option>Website redesign</option><option>Not sure yet</option></select></label></div>
           <label>Tell us about your project <span>*</span><textarea name="description" required rows="4" placeholder="What are you working on? What would a great result look like?"></textarea></label>
@@ -2410,13 +2414,13 @@ html[data-theme="light"] .form-status-error{color:#a83636!important}</style>
 
     try {
       const formData = Object.fromEntries(new FormData(inquiryForm).entries());
-      const response = await fetch('/api/contact', {
+      const response = await fetch('https://api.web3forms.com/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify(formData)
       });
       const result = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(result.error || 'send_failed');
+      if (!response.ok || !result.success) throw new Error(result.message || 'send_failed');
       status.textContent = document.documentElement.lang === 'sq'
         ? 'Faleminderit — kërkesa u dërgua. Do t’ju kontaktojmë së shpejti.'
         : 'Thanks — your inquiry was sent. We’ll be in touch soon.';
